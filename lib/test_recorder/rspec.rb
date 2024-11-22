@@ -42,10 +42,6 @@ RSpec.configure do |config|
     TestRecorder::RSpec.after_failed_example(example)
   end
   
-  config.after(type: :request) do |example|
-    TestRecorder::RSpec.after_failed_example(example)
-  end
-  
   config.after(type: :feature) do |example|
     TestRecorder::RSpec.after_failed_example(example)
   end
