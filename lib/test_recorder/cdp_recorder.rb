@@ -30,20 +30,17 @@ module TestRecorder
       @stdin.set_encoding("ASCII-8BIT")
 
       @page = page
-      @page.driver.browser.devtools.page.enable
 
-      @page.driver.browser.devtools.page.on(:screencast_frame) do |event|
-        decoded_data = Base64.decode64(event["data"])
+      @page.driver.browser.page.start_screencast(format: "jpeg", quality: 90) do |data, _metadata, _session_id|
+        decoded_data = Base64.decode64(data)
         @stdin.print(decoded_data) rescue nil
-        @page.driver.browser.devtools.page.screencast_frame_ack(session_id: event["sessionId"])
+        # @page.driver.browser.page.screencast_frame_ack(session_id: event["sessionId"])
       end
-
-      @page.driver.browser.devtools.page.start_screencast(format: "jpeg", quality: 90)
     end
 
     def stop_and_discard
       if @started
-        @page.driver.browser.devtools.page.stop_screencast
+        @page.driver.browser.page.stop_screencast
         @stdin.close
       end
     end
@@ -51,7 +48,7 @@ module TestRecorder
     def stop_and_save(filename)
       return "" unless @started
 
-      @page.driver.browser.devtools.page.stop_screencast
+      @page.driver.browser.page.stop_screencast
       @stdin.close
       @wait_thrs.each(&:join)
 
