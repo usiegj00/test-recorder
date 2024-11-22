@@ -26,8 +26,9 @@ module TestRecorder
       @stdin, @wait_thrs = *Open3.pipeline_w(cmd)
       @stdin.set_encoding("ASCII-8BIT")
 
+      return unless page.driver.browser.respond_to?(:page)
+      
       @page = page
-
       @page.driver.browser.page.start_screencast(format: "jpeg", every_nth_frame: 1, quality: 90) do |data, _metadata, _session_id|
         decoded_data = Base64.decode64(data)
         @stdin.print(decoded_data) rescue nil
@@ -36,6 +37,7 @@ module TestRecorder
     end
 
     def stop_and_discard
+      return unless @page.driver.browser.respond_to?(:page)
       if @started
         @page.driver.browser.page.stop_screencast
         @stdin.close
@@ -44,6 +46,7 @@ module TestRecorder
 
     def stop_and_save(filename)
       return "" unless @started
+      return unless @page.driver.browser.respond_to?(:page)
 
       @page.driver.browser.page.stop_screencast
       @stdin.close
