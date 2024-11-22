@@ -17,21 +17,18 @@ module TestRecorder
     end
 
     def start(page:, enabled: nil)
-      puts "Start..."
       enabled = @enabled if enabled.nil?
       @started = enabled
       return unless @started
 
       @tmp_video = Tempfile.open(["testrecorder", ".webm"])
       cmd = "ffmpeg -loglevel quiet -f image2pipe -avioflags direct -fpsprobesize 0 -probesize 32 -analyzeduration 0 -c:v mjpeg -i - -y -an -r 25 -qmin 0 -qmax 50 -crf 8 -deadline realtime -speed 8 -b:v 1M -threads 1 #{@tmp_video.path}"
-      puts "Running #{cmd}"
-      debugger
       @stdin, @wait_thrs = *Open3.pipeline_w(cmd)
       @stdin.set_encoding("ASCII-8BIT")
 
       @page = page
 
-      @page.driver.browser.page.start_screencast(format: "jpeg", quality: 90) do |data, _metadata, _session_id|
+      @page.driver.browser.page.start_screencast(format: "jpeg", every_nth_frame: 1, quality: 90) do |data, _metadata, _session_id|
         decoded_data = Base64.decode64(data)
         @stdin.print(decoded_data) rescue nil
         # @page.driver.browser.page.screencast_frame_ack(session_id: event["sessionId"])
