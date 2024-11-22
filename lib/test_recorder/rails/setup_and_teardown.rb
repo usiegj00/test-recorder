@@ -2,20 +2,15 @@ module TestRecorder
   module Rails
     module SetupAndTeardown
       def before_setup
-        @cdp_recorder = TestRecorder::CdpRecorder.new(enabled: TestRecorder.enabled?)
-        enabled = respond_to?(:metadata) ? metadata[:test_recorder] : nil
-        @cdp_recorder.start(page: page, enabled: enabled)
+        @cdp_recorder = TestRecorder::CdpRecorder.new(enabled: true)
+        @cdp_recorder.start(page: page, enabled: true)
 
         super
       end
 
       def before_teardown
-        if failures.empty?
-          @cdp_recorder.stop_and_discard
-        else
-          video_path = @cdp_recorder.stop_and_save("failures_#{self.name}.webm")
-          puts "[Video]: #{video_path}" if File.exist?(video_path)
-        end
+        video_path = @cdp_recorder.stop_and_save("spec_#{self.name}.webm")
+        puts "[Video]: #{video_path}" if File.exist?(video_path)
       ensure
         super
       end
