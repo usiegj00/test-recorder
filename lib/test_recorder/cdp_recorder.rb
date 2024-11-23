@@ -15,6 +15,8 @@ module TestRecorder
     def setup
       @frames_dir = ::Rails.root.join("tmp", "frames")
       FileUtils.mkdir_p(@frames_dir)
+      # Clean up any old frames (anything .png in the directory)
+      FileUtils.rm_f("#{@frames_dir}/*.png")
     end
 
     def start(page:, enabled: nil)
@@ -50,9 +52,9 @@ module TestRecorder
         data, metadata, session_id = frame.split("|")
         timestamp = metadata.split("timestamp\"=>")[1].split("}")[0]
         # Parse the timestamp (a float) and then format it back as a float, but with 0 padding so it can be lexically sorted
-        timestamp = format("%0.6f", timestamp.to_f)
+        timestamp = format("%0.8f", timestamp.to_f)
 
-        frame_path = @frames_dir.join("#{filename}_#{session_id}_#{i}_#{timestamp}.png")
+        frame_path = @frames_dir.join("#{timestamp}_#{filename}_#{session_id}_#{i}.png")
         File.open(frame_path, "wb") do |f|
           f.set_encoding("ASCII-8BIT")
           f.write(Base64.decode64(data))
