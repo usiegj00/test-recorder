@@ -55,7 +55,7 @@ module TestRecorder
           f.write(Base64.decode64(data))
         end
       end
-      ""
+      @frames_dir
     end
   end
 end
