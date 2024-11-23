@@ -24,9 +24,9 @@ module TestRecorder
       @started = enabled
       return unless @started
 
+      @page = page
       return unless page.driver.browser.respond_to?(:page)
       
-      @page = page
       @page.driver.browser.page.start_screencast(format: "png", every_nth_frame: 1) do |data, _metadata, _session_id|
         @frames.write("#{data}|#{_metadata}|#{_session_id}\n")
       end
