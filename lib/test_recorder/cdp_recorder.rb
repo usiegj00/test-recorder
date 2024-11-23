@@ -49,6 +49,9 @@ module TestRecorder
         next if frame.empty?
         data, metadata, session_id = frame.split("|")
         timestamp = metadata.split("timestamp\"=>")[1].split("}")[0]
+        # Parse the timestamp (a float) and then format it back as a float, but with 0 padding so it can be lexically sorted
+        timestamp = format("%0.6f", timestamp.to_f)
+
         frame_path = @frames_dir.join("#{filename}_#{session_id}_#{i}_#{timestamp}.png")
         File.open(frame_path, "wb") do |f|
           f.set_encoding("ASCII-8BIT")
