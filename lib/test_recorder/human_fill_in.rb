@@ -4,6 +4,8 @@ if defined?(Capybara::Session)
       def fill_in(locator, with:, wpm: 40, error_rate: 0.06, bypass: false, **options)
         # Bypass the human typing simulation
         return super(locator, with: with, **options) if bypass
+        return super(locator, with: with, **options) if wpm <= 0 || wpm > 1000
+        return super(locator, with: with, **options) if !respond_to?(:find_field) || !respond_to?(:send_keys) || !respond_to?(:click)
         # Locate the input field
         field = find_field(locator, **options)
         field.click # Ensure the field is focused
