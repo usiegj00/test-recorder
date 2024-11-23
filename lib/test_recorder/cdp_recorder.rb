@@ -16,7 +16,7 @@ module TestRecorder
       @frames_dir = ::Rails.root.join("tmp", "frames")
       FileUtils.mkdir_p(@frames_dir)
       # Clean up any old frames (anything .png in the directory)
-      FileUtils.rm_f("#{@frames_dir}/*.png")
+      FileUtils.rm_rf(Dir["#{@frames_dir}/*.png"])
     end
 
     def start(page:, enabled: nil)
