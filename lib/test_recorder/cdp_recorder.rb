@@ -47,14 +47,14 @@ module TestRecorder
 
       @page.driver.browser.page.stop_screencast
 
-      @frames.string.split("\n").each.with_index do |frame, i|
+      @frames.string.split("\n").each do |frame|
         next if frame.empty?
         data, metadata, session_id = frame.split("|")
         timestamp = metadata.split("timestamp\"=>")[1].split("}")[0]
         # Parse the timestamp (a float) and then format it back as a float, but with 0 padding so it can be lexically sorted
-        timestamp = format("%0.8f", timestamp.to_f)
+        timestamp = format("%0.08f", timestamp.to_f)
 
-        frame_path = @frames_dir.join("#{timestamp}_#{filename}_#{session_id}_#{i}.png")
+        frame_path = @frames_dir.join("#{filename}_#{timestamp}.png")
         File.open(frame_path, "wb") do |f|
           f.set_encoding("ASCII-8BIT")
           f.write(Base64.decode64(data))
