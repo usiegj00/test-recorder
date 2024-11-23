@@ -9,7 +9,7 @@ module TestRecorder
       end
 
       def before_teardown
-        video_path = @cdp_recorder.stop_and_save("spec_#{self.name}.webm")
+        video_path = @cdp_recorder.stop_and_save("spec_#{self.name}")
         puts "[Video]: #{video_path}" if File.exist?(video_path)
       ensure
         super
