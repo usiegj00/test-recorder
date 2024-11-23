@@ -8,12 +8,13 @@ module TestRecorder
       @enabled = enabled
       @started = nil
       @page = nil
+      @frames = StringIO.new
       setup
     end
 
     def setup
-      @video_dir = ::Rails.root.join("tmp", "videos")
-      FileUtils.mkdir_p(@video_dir)
+      @frames_dir = ::Rails.root.join("tmp", "frames")
+      FileUtils.mkdir_p(@frames_dir)
     end
 
     def start(page:, enabled: nil)
@@ -21,18 +22,11 @@ module TestRecorder
       @started = enabled
       return unless @started
 
-      @tmp_video = Tempfile.open(["testrecorder", ".webm"])
-      cmd = "ffmpeg -loglevel quiet -f image2pipe -avioflags direct -fpsprobesize 0 -probesize 32 -analyzeduration 0 -c:v mjpeg -i - -y -an -r 25 -qmin 0 -qmax 50 -crf 8 -deadline realtime -speed 8 -b:v 1M -threads 1 #{@tmp_video.path}"
-      @stdin, @wait_thrs = *Open3.pipeline_w(cmd)
-      @stdin.set_encoding("ASCII-8BIT")
-
       return unless page.driver.browser.respond_to?(:page)
       
       @page = page
-      @page.driver.browser.page.start_screencast(format: "jpeg", every_nth_frame: 1, quality: 90) do |data, _metadata, _session_id|
-        decoded_data = Base64.decode64(data)
-        @stdin.print(decoded_data) rescue nil
-        # @page.driver.browser.page.screencast_frame_ack(session_id: event["sessionId"])
+      @page.driver.browser.page.start_screencast(format: "png", every_nth_frame: 1) do |data, _metadata, _session_id|
+        @frames.write("#{data}|#{_metadata}|#{_session_id}\n")
       end
     end
 
@@ -40,7 +34,8 @@ module TestRecorder
       return unless @page.driver.browser.respond_to?(:page)
       if @started
         @page.driver.browser.page.stop_screencast
-        @stdin.close
+        @frames.truncate(0)
+        @frames.close
       end
     end
 
@@ -49,14 +44,18 @@ module TestRecorder
       return unless @page.driver.browser.respond_to?(:page)
 
       @page.driver.browser.page.stop_screencast
-      @stdin.close
-      @wait_thrs.each(&:join)
 
-      video_path = File.join(@video_dir, filename)
-      FileUtils.copy(@tmp_video.path, video_path)
-      @tmp_video.close(true)
-
-      video_path
+      @frames.string.split("\n").each.with_index do |frame, i|
+        next if frame.empty?
+        data, metadata, session_id = frame.split("|")
+        timestamp = metadata.split("timestamp\"=>")[1].split("}")[0]
+        frame_path = @frames_dir.join("#{filename}_#{session_id}_#{i}_#{timestamp}.png")
+        File.open(frame_path, "wb") do |f|
+          f.set_encoding("ASCII-8BIT")
+          f.write(Base64.decode64(data))
+        end
+      end
+      ""
     end
   end
 end
