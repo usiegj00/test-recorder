@@ -8,15 +8,15 @@ module TestRecorder
     class << self
       attr_accessor :cdp_recorder
 
-      def after_failed_example(example)
-        video_path = cdp_recorder.stop_and_save("failures_#{method_name(example)}.webm").to_s
+      def after_example(example)
+        video_path = cdp_recorder.stop_and_save(method_name(example)).to_s
         if File.exist?(video_path)
           example.metadata[:extra_failure_lines] = [example.metadata[:extra_failure_lines], "[Video]: #{video_path}"].flatten
         end
       end
 
       def method_name(example)
-        example.description.underscore.tr(CHARS_TO_TRANSLATE.join, "_")[0...200] + "_#{rand(1000)}"
+        example.description.underscore.tr(CHARS_TO_TRANSLATE.join, "_")[0...200]
       end
 
       def passed?(example)
@@ -39,10 +39,10 @@ RSpec.configure do |config|
   TestRecorder::RSpec.cdp_recorder = TestRecorder::CdpRecorder.new(enabled: true)
 
   config.after(type: :system) do |example|
-    TestRecorder::RSpec.after_failed_example(example)
+    TestRecorder::RSpec.after_example(example)
   end
   
   config.after(type: :feature) do |example|
-    TestRecorder::RSpec.after_failed_example(example)
+    TestRecorder::RSpec.after_example(example)
   end
 end
