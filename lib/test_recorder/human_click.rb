@@ -24,6 +24,7 @@ if defined?(Capybara::Session)
   end
 
   # Extend Capybara::Session to include the new behavior
-  Capybara::Session.prepend(Capybara::HumanClick)
+  Capybara::Node::Element.include(Capybara::HumanClick)
+  # Capybara::Session.prepend(Capybara::HumanClick)
   puts "Loaded human click."
 end
