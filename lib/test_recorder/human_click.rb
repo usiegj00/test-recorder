@@ -5,24 +5,26 @@ if defined?(Capybara::Session)
         # Bypass the human typing simulation
         return super(*options) if bypass
 
-        debugger
+        if self.is_a?(Capybara::Node::Element) && self.native.is_a?(Capybara::Cuprite::Node) && self.native.node.is_a?(Ferrum::Node)
+          # self.native.node.instance_eval { bounding_rect_coordinates }
+          # [363.0234375, 136.5]
+          # self.native.node.instance_eval { wait_for_stop_moving.map { |q| to_points(q) }.first }
+          # [{:x=>21.5234375, :y=>127}, {:x=>504.125, :y=>127}, {:x=>504.125, :y=>145.5}, {:x=>221.5234375, :y=>145.5}]
+          # self.session.driver.browser.mouse.instance_variable_get("@x")
+          coords = self.native.node.instance_eval { wait_for_stop_moving.map { |q| to_points(q) }.first }
+          # Make into x,y,w,h
+          coords = coords.reduce({}) do |acc, q|
+            acc[:x] = q[:x] if acc[:x].nil? || q[:x] < acc[:x]
+            acc[:y] = q[:y] if acc[:y].nil? || q[:y] < acc[:y]
+            acc[:w] = q[:x] if acc[:w].nil? || q[:x] > acc[:w]
+            acc[:h] = q[:y] if acc[:h].nil? || q[:y] > acc[:h]
+            acc
+          end
 
-        rect = self.rect
-        puts "Clicking in the rectangle: #{rect.x}, #{rect.y}, #{rect.width}, #{rect.height}"
-
-        # Retrieve the current mouse position
-        current_position = page.driver.browser.mouse.position
-
-        # Log the current mouse position
-        puts "Current mouse position: #{current_position}"
-
-        # Retrieve the target element's position
-        target_position = self.native.rect
-
-        # Log the target element's position
-        puts "Target element position: #{target_position}"
-
-        # Call the original click method
+          puts "Clicking in the rectangle: #{coords}"
+        else
+          puts "Only supported for Cuprite/Ferrum drivers."
+        end
         super(*options)
       end
     end
