@@ -5,6 +5,11 @@ if defined?(Capybara::Session)
         # Bypass the human typing simulation
         return super(*options) if bypass
 
+        debugger
+
+        rect = self.rect
+        puts "Clicking in the rectangle: #{rect.x}, #{rect.y}, #{rect.width}, #{rect.height}"
+
         # Retrieve the current mouse position
         current_position = page.driver.browser.mouse.position
 
