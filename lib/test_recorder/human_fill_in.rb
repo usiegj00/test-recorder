@@ -5,9 +5,10 @@ if defined?(Capybara::Session)
         # Bypass the human typing simulation
         return super(locator, with: with, **options) if bypass
         return super(locator, with: with, **options) if wpm <= 0 || wpm > 1000
-        return super(locator, with: with, **options) if !respond_to?(:find_field) || !respond_to?(:send_keys) || !respond_to?(:click)
+        return super(locator, with: with, **options) if !respond_to?(:find_field)
         # Locate the input field
         field = find_field(locator, **options)
+        return super(locator, with: with, **options) if field.nil? || !field.respond_to?(:click) || !field.respond_to?(:set) || !field.respond_to?(:send_keys)
         field.click # Ensure the field is focused
         sleep rand(0.2..0.5) # Simulate initial focus delay
 
