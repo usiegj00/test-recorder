@@ -50,6 +50,9 @@ if defined?(Capybara::Session)
             sleep rand(1.0..2.0) # Pause between 1 to 2 seconds
           end
         end
+      rescue NotImplementedError
+        # Some drivers define send_keys but don't implement it
+        return super(locator, with: with, **options)
       end
     end
   end
