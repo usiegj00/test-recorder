@@ -9,7 +9,7 @@ module TestRecorder
             enabled: self.metadata[:test_recorder]
           )
         else
-          puts "Test type does not respond to page. Skipping test screen recording."
+          # puts "Test type does not respond to page. Skipping test screen recording."
         end
       end
     end
