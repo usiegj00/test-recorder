@@ -6,6 +6,10 @@ if defined?(Capybara::Session)
         return super(*options) if bypass
 
         if self.is_a?(Capybara::Node::Element) && self.native.is_a?(Capybara::Cuprite::Node) && self.native.node.is_a?(Ferrum::Node)
+
+          @click_log ||= File.open("tmp/clicks.log", "w")
+
+          
           # self.native.node.instance_eval { bounding_rect_coordinates }
           # [363.0234375, 136.5]
           # self.native.node.instance_eval { wait_for_stop_moving.map { |q| to_points(q) }.first }
@@ -21,7 +25,8 @@ if defined?(Capybara::Session)
             acc
           end
 
-          puts "Clicking in the rectangle: #{coords}"
+          # puts "Clicking in the rectangle: #{coords}"
+          @click_log.puts({coords: coords, timestamp: Time.now.to_f}.to_json)
         else
           puts "Only supported for Cuprite/Ferrum drivers."
         end
