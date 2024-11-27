@@ -7,7 +7,7 @@ if defined?(Capybara::Session)
 
         if self.is_a?(Capybara::Node::Element) && self.native.is_a?(Capybara::Cuprite::Node) && self.native.node.is_a?(Ferrum::Node)
 
-          @click_log ||= File.open("tmp/clicks.log", "w")
+          @@click_log ||= File.open("tmp/clicks.log", "w")
 
           
           # self.native.node.instance_eval { bounding_rect_coordinates }
@@ -26,7 +26,7 @@ if defined?(Capybara::Session)
           end
 
           # puts "Clicking in the rectangle: #{coords}"
-          @click_log.puts({coords: coords, timestamp: Time.now.to_f}.to_json)
+          @@click_log.puts({coords: coords, timestamp: Time.now.to_f}.to_json)
         else
           puts "Only supported for Cuprite/Ferrum drivers."
         end
