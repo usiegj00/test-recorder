@@ -90,6 +90,30 @@ if defined?(Capybara::Session)
         # @page.driver.browser.page.evaluate("installMouseHelper()")
       end
 
+      def add_pointer(x:, y:)
+        javascript = <<~JS
+          (function() {
+            const box = document.createElement('div');
+            box.id = 'test-pointer';
+            box.style.position = 'fixed';
+            box.style.width = '20px';
+            box.style.height = '20px';
+            box.style.backgroundColor = 'rgba(0,0,0,.4)';
+            box.style.border = '1px solid white';
+            box.style.borderRadius = '10px';
+            box.style.margin = '-10px 0 0 -10px';
+            box.style.padding = '0';
+            box.style.transition = 'background .2s, border-radius .2s, border-color .2s';
+            box.style.pointerEvents = 'none';
+            box.style.zIndex = '9999';
+            box.style.left = '#{x}px';
+            box.style.top = '#{y}px';
+            document.body.appendChild(box);
+          })();
+        JS
+        self.session.driver.browser.page.evaluate(javascript)
+      end
+
       def add_red_box
         javascript = <<~JS
           (function() {
@@ -140,6 +164,7 @@ if defined?(Capybara::Session)
           # self.session.driver.browser.mouse.move_to(coords[:x] + coords[:w] / 2, coords[:y] + coords[:h] / 2)
           add_mouse_pointer
           add_red_box
+          add_pointer(x: coords[:x] + coords[:w] / 2, y: coords[:y] + coords[:h] / 2)
           # simulate_mouse_movement(coords[:x] + coords[:w] / 2, coords[:y] + coords[:h] / 2)
           self.session.driver.browser.mouse.move(x: coords[:x] + coords[:w] / 2, y: coords[:y] + coords[:h] / 2)
           # Click the element
