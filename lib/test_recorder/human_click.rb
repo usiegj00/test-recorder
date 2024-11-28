@@ -1,15 +1,23 @@
 if defined?(Capybara::Session)
   module Capybara
     module HumanClick
+      def setup
+        @frames_dir = ::Rails.root.join("tmp", "frames")
+        FileUtils.mkdir_p(@frames_dir)
+        # Clean up any old frames (anything .png in the directory)
+        FileUtils.rm_rf(Dir["#{@frames_dir}/*.png"])
+        @@click_log ||= File.open("tmp/clicks.log", "w")
+        timestamp = format("%0.08f", timestamp.to_f)
+        frame_path = @frames_dir.join("#{filename}_#{timestamp}.png")
+      end
+
       def click(*options, bypass: false)
         # Bypass the human typing simulation
         return super(*options) if bypass
 
         if self.is_a?(Capybara::Node::Element) && self.native.is_a?(Capybara::Cuprite::Node) && self.native.node.is_a?(Ferrum::Node)
-
           @@click_log ||= File.open("tmp/clicks.log", "w")
 
-          
           # self.native.node.instance_eval { bounding_rect_coordinates }
           # [363.0234375, 136.5]
           # self.native.node.instance_eval { wait_for_stop_moving.map { |q| to_points(q) }.first }
@@ -27,6 +35,10 @@ if defined?(Capybara::Session)
 
           # puts "Clicking in the rectangle: #{coords}"
           @@click_log.puts({coords: coords, timestamp: Time.now.to_f}.to_json)
+          
+          # Move the mouse to the center of the element
+          self.session.driver.browser.mouse.move_to(coords[:x] + coords[:w] / 2, coords[:y] + coords[:h] / 2)
+
         else
           puts "Only supported for Cuprite/Ferrum drivers."
         end

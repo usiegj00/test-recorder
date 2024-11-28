@@ -30,15 +30,15 @@ if defined?(Capybara::Session)
             # Introduce a random incorrect character
             incorrect_char = ('a'..'z').to_a.sample
             field.send_keys(incorrect_char)
-            sleep base_delay * (0.8 + rand * 0.4)
+            sleep base_delay * (0.2 + rand * 0.4)
             # Backspace to correct the error
             field.send_keys(:backspace)
-            sleep base_delay * (0.8 + rand * 0.4)
+            sleep base_delay * (0.2 + rand * 0.4)
           end
 
           # Send the correct character
           field.send_keys(char)
-          sleep base_delay * (0.8 + rand * 0.4)
+          sleep base_delay * (0.2 + rand * 0.4)
 
           # Introduce pauses after punctuation
           if punctuation_marks.include?(char)
