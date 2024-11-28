@@ -94,7 +94,12 @@ if defined?(Capybara::Session)
         # Make the pointer centered on x,y
         javascript = <<~JS
         (function() {
+           // Remove any existing pointer
+          const existingBox = document.getElementById('cast-pointer');
+          if (existingBox) { existingBox.remove(); }
+
           const box = document.createElement('div');
+          box.id = 'cast-pointer';
           box.style.position = 'fixed';
           box.style.top = '#{y}px';
           box.style.left = '#{x}px';
@@ -117,14 +122,17 @@ if defined?(Capybara::Session)
       def add_red_box(rect:)
         javascript = <<~JS
           (function() {
+            const existingBox = document.getElementById('cast-element-highlight');
+            if (existingBox) { existingBox.remove(); }
+
             const box = document.createElement('div');
-            box.id = 'test-red-box';
+            box.id = 'cast-element-highlight';
             box.style.position = 'fixed';
             box.style.top = '#{rect[:y]}px';
             box.style.left = '#{rect[:x]}px';
             box.style.width = '#{rect[:w]}px';
             box.style.height = '#{rect[:h]}px';
-            box.style.backgroundColor = 'rgba(255,0,0,.4)';
+            box.style.backgroundColor = 'rgba(255,0,0,.2)';
             box.style.zIndex = '9000';
             box.style.pointerEvents = 'none';
             document.body.appendChild(box);
@@ -166,9 +174,26 @@ if defined?(Capybara::Session)
           # self.session.driver.browser.mouse.move_to(coords[:x] + coords[:w] / 2, coords[:y] + coords[:h] / 2)
           # add_mouse_pointer
           add_red_box(rect: coords) 
-          add_pointer(x: coords[:x] + coords[:w] / 2, y: coords[:y] + coords[:h] / 2)
+
+          starting_position = self.session.driver.browser.mouse.instance_variable_get("@position")
+          puts "Starting position: #{starting_position}"
+          puts "Moving to: #{coords[:x] + coords[:w] / 2}, #{coords[:y] + coords[:h] / 2}"
+          # Move the mouse based on Fips algorithm:
+          # Calculate the distance between where the mouse is and needs to be
+          # Calculate the time it will take to move that distance
+          # Move the mouse in that time
+          distance = Math.sqrt((coords[:x] + coords[:w] / 2 - starting_position[:x]) ** 2 + (coords[:y] + coords[:h] / 2 - starting_position[:y]) ** 2)
+          time = distance / 1000
+          puts "Distance: #{distance}, Time: #{time}"
+          # Move the mouse in 0.05 second intervals:
+          time.to_i.times do |i|
+            # self.session.driver.browser.mouse.move(x: starting_position[:x] + (coords[:x] + coords[:w] / 2 - starting_position[:x]) * i / time, y: starting_position[:y] + (coords[:y] + coords[:h] / 2 - starting_position[:y]) * i / time)
+            x, y = starting_position[:x] + (coords[:x] + coords[:w] / 2 - starting_position[:x]) * i / time, starting_position[:y] + (coords[:y] + coords[:h] / 2 - starting_position[:y]) * i / time
+            add_pointer(x: x, y: y)
+            self.session.driver.browser.mouse.move(x: x, y: y)
+            sleep(0.05)
+          end
           # simulate_mouse_movement(coords[:x] + coords[:w] / 2, coords[:y] + coords[:h] / 2)
-          self.session.driver.browser.mouse.move(x: coords[:x] + coords[:w] / 2, y: coords[:y] + coords[:h] / 2)
           # Click the element
           # self.session.driver.browser.mouse.down.up
 
