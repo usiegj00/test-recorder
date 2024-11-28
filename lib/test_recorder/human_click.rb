@@ -106,6 +106,7 @@ if defined?(Capybara::Session)
           box.style.margin = '-10px 0 0 -10px';
           box.style.padding = '0';
           box.style.zIndex = '9999';
+          box.style.pointerEvents = 'none';
           box.style.transition = 'background .2s, border-radius .2s, border-color .2s';
           document.body.appendChild(box);
         })();
