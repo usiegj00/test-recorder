@@ -13,7 +13,7 @@ if defined?(Capybara::Session)
 
       def simulate_mouse_movement(x, y)
         javascript = <<~JS
-          var event = new MouseEvent('mousemove', {
+          const event = new MouseEvent('mousemove', {
             bubbles: true,
             cancelable: true,
             clientX: #{x},
@@ -22,6 +22,7 @@ if defined?(Capybara::Session)
           document.dispatchEvent(event);
         JS
 
+        debugger
         self.session.driver.browser.page.evaluate(javascript)
       end
 
