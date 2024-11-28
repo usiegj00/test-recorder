@@ -176,6 +176,7 @@ if defined?(Capybara::Session)
           add_red_box(rect: coords) 
 
           starting_position = self.session.driver.browser.mouse.instance_variable_get("@position")
+          debugger
           puts "Starting position: #{starting_position}"
           puts "Moving to: #{coords[:x] + coords[:w] / 2}, #{coords[:y] + coords[:h] / 2}"
           # Move the mouse based on Fips algorithm:
