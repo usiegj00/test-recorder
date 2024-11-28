@@ -90,6 +90,26 @@ if defined?(Capybara::Session)
         # @page.driver.browser.page.evaluate("installMouseHelper()")
       end
 
+      def add_red_box
+        javascript = <<~JS
+          (function() {
+            const box = document.createElement('div');
+            box.id = 'test-red-box';
+            box.style.position = 'fixed';
+            box.style.top = '50%';
+            box.style.left = '50%';
+            box.style.width = '100px';
+            box.style.height = '100px';
+            box.style.backgroundColor = 'red';
+            box.style.zIndex = '9999';
+            box.style.transform = 'translate(-50%, -50%)';
+            document.body.appendChild(box);
+          })();
+        JS
+
+        self.session.driver.browser.page.evaluate(javascript)
+      end
+
 
       def click(*options, bypass: false)
         # Bypass the human typing simulation
@@ -119,6 +139,7 @@ if defined?(Capybara::Session)
           # Move the mouse to the center of the element
           # self.session.driver.browser.mouse.move_to(coords[:x] + coords[:w] / 2, coords[:y] + coords[:h] / 2)
           add_mouse_pointer
+          add_red_box
           # simulate_mouse_movement(coords[:x] + coords[:w] / 2, coords[:y] + coords[:h] / 2)
           self.session.driver.browser.mouse.move(x: coords[:x] + coords[:w] / 2, y: coords[:y] + coords[:h] / 2)
           # Click the element
