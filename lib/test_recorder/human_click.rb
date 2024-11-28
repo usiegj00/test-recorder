@@ -91,42 +91,40 @@ if defined?(Capybara::Session)
       end
 
       def add_pointer(x:, y:)
+        # Make the pointer centered on x,y
         javascript = <<~JS
-          (function() {
-            const box = document.createElement('div');
-            box.id = 'test-pointer';
-            box.style.position = 'fixed';
-            box.style.width = '20px';
-            box.style.height = '20px';
-            box.style.backgroundColor = 'rgba(0,0,0,.4)';
-            box.style.border = '1px solid white';
-            box.style.borderRadius = '10px';
-            box.style.margin = '-10px 0 0 -10px';
-            box.style.padding = '0';
-            box.style.transition = 'background .2s, border-radius .2s, border-color .2s';
-            box.style.pointerEvents = 'none';
-            box.style.zIndex = '9999';
-            box.style.left = '#{x}px';
-            box.style.top = '#{y}px';
-            document.body.appendChild(box);
-          })();
+        (function() {
+          const box = document.createElement('puppeteer-mouse-pointer');
+          box.style.position = 'fixed';
+          box.style.top = '#{y}px';
+          box.style.left = '#{x}px';
+          box.style.width = '20px';
+          box.style.height = '20px';
+          box.style.background = 'rgba(0,0,0,.4)';
+          box.style.border = '1px solid white';
+          box.style.borderRadius = '10px';
+          box.style.margin = '-10px 0 0 -10px';
+          box.style.padding = '0';
+          box.style.transition = 'background .2s, border-radius .2s, border-color .2s';
+          document.body.appendChild(box);
+        })();
         JS
         self.session.driver.browser.page.evaluate(javascript)
       end
 
-      def add_red_box
+      def add_red_box(rect:)
         javascript = <<~JS
           (function() {
             const box = document.createElement('div');
             box.id = 'test-red-box';
             box.style.position = 'fixed';
-            box.style.top = '50%';
-            box.style.left = '50%';
-            box.style.width = '100px';
-            box.style.height = '100px';
-            box.style.backgroundColor = 'red';
-            box.style.zIndex = '9999';
-            box.style.transform = 'translate(-50%, -50%)';
+            box.style.top = '#{rect[:y]}px';
+            box.style.left = '#{rect[:x]}px';
+            box.style.width = '#{rect[:w]}px';
+            box.style.height = '#{rect[:h]}px';
+            box.style.backgroundColor = 'rgba(255,0,0,.4)';
+            box.style.zIndex = '9000';
+            box.style.pointerEvents = 'none';
             document.body.appendChild(box);
           })();
         JS
@@ -163,7 +161,7 @@ if defined?(Capybara::Session)
           # Move the mouse to the center of the element
           # self.session.driver.browser.mouse.move_to(coords[:x] + coords[:w] / 2, coords[:y] + coords[:h] / 2)
           add_mouse_pointer
-          add_red_box
+          add_red_box(rect: coords) 
           add_pointer(x: coords[:x] + coords[:w] / 2, y: coords[:y] + coords[:h] / 2)
           # simulate_mouse_movement(coords[:x] + coords[:w] / 2, coords[:y] + coords[:h] / 2)
           self.session.driver.browser.mouse.move(x: coords[:x] + coords[:w] / 2, y: coords[:y] + coords[:h] / 2)
