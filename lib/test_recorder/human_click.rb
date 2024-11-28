@@ -94,7 +94,7 @@ if defined?(Capybara::Session)
         # Make the pointer centered on x,y
         javascript = <<~JS
         (function() {
-          const box = document.createElement('puppeteer-mouse-pointer');
+          const box = document.createElement('div');
           box.style.position = 'fixed';
           box.style.top = '#{y}px';
           box.style.left = '#{x}px';
@@ -105,6 +105,7 @@ if defined?(Capybara::Session)
           box.style.borderRadius = '10px';
           box.style.margin = '-10px 0 0 -10px';
           box.style.padding = '0';
+          box.style.zIndex = '9999';
           box.style.transition = 'background .2s, border-radius .2s, border-color .2s';
           document.body.appendChild(box);
         })();
