@@ -22,7 +22,7 @@ if defined?(Capybara::Session)
           document.dispatchEvent(event);
         JS
 
-        @page.driver.browser.page.evaluate(javascript)
+        self.session.driver.browser.page.evaluate(javascript)
       end
 
 
