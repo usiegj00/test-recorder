@@ -95,12 +95,15 @@ if defined?(Capybara::Session)
       def blink_pointer(x:, y:)
         javascript = <<~JS
         (function() {
+          // Remove any existing pointer
+          const existingBox = document.getElementById('cast-pointer');
+          if (existingBox) { existingBox.remove(); }
+
           const box = document.createElement('div');
           box.id = 'cast-pointer';
           box.style.position = 'fixed';
           box.style.top = '#{y}px';
           box.style.left = '#{x}px';
-          # Make this bigger than the pointer
           box.style.width = '40px';
           box.style.height = '40px';
           box.style.background = 'rgba(0,0,0,.4)';
