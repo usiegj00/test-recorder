@@ -148,19 +148,21 @@ if defined?(Capybara::Session)
           coords = self.native.node.instance_eval { wait_for_stop_moving.map { |q| to_points(q) }.first }
           # Make into x,y,w,h
           coords = coords.reduce({}) do |acc, q|
-            acc[:x] = q[:x] if acc[:x].nil? || q[:x] < acc[:x]
-            acc[:y] = q[:y] if acc[:y].nil? || q[:y] < acc[:y]
-            acc[:w] = q[:x] if acc[:w].nil? || q[:x] > acc[:w]
-            acc[:h] = q[:y] if acc[:h].nil? || q[:y] > acc[:h]
+            acc[:x1] = q[:x] if acc[:x1].nil? || q[:x] < acc[:x1]
+            acc[:y1] = q[:y] if acc[:y1].nil? || q[:y] < acc[:y1]
+            acc[:x2] = q[:x] if acc[:x2].nil? || q[:x] > acc[:x2]
+            acc[:y2] = q[:y] if acc[:y2].nil? || q[:y] > acc[:y2]
             acc
           end
+          # Now we have x1,y1,x2,y2, convert to x,y,w,h
+          coords = { x: coords[:x1], y: coords[:y1], w: coords[:x2] - coords[:x1], h: coords[:y2] - coords[:y1] }
 
           # puts "Clicking in the rectangle: #{coords}"
           @@click_log.puts({coords: coords, timestamp: Time.now.to_f}.to_json)
           
           # Move the mouse to the center of the element
           # self.session.driver.browser.mouse.move_to(coords[:x] + coords[:w] / 2, coords[:y] + coords[:h] / 2)
-          add_mouse_pointer
+          # add_mouse_pointer
           add_red_box(rect: coords) 
           add_pointer(x: coords[:x] + coords[:w] / 2, y: coords[:y] + coords[:h] / 2)
           # simulate_mouse_movement(coords[:x] + coords[:w] / 2, coords[:y] + coords[:h] / 2)
