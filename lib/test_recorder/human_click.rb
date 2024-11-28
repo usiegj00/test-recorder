@@ -11,6 +11,21 @@ if defined?(Capybara::Session)
         frame_path = @frames_dir.join("#{filename}_#{timestamp}.png")
       end
 
+      def simulate_mouse_movement(x, y)
+        javascript = <<~JS
+          const event = new MouseEvent('mousemove', {
+            bubbles: true,
+            cancelable: true,
+            clientX: #{x},
+            clientY: #{y}
+          });
+          document.dispatchEvent(event);
+        JS
+
+        @page.driver.browser.page.evaluate(javascript)
+      end
+
+
       def click(*options, bypass: false)
         # Bypass the human typing simulation
         return super(*options) if bypass
@@ -37,7 +52,8 @@ if defined?(Capybara::Session)
           @@click_log.puts({coords: coords, timestamp: Time.now.to_f}.to_json)
           
           # Move the mouse to the center of the element
-          self.session.driver.browser.mouse.move_to(coords[:x] + coords[:w] / 2, coords[:y] + coords[:h] / 2)
+          # self.session.driver.browser.mouse.move_to(coords[:x] + coords[:w] / 2, coords[:y] + coords[:h] / 2)
+          simulate_mouse_movement(coords[:x] + coords[:w] / 2, coords[:y] + coords[:h] / 2)
 
         else
           puts "Only supported for Cuprite/Ferrum drivers."
