@@ -181,6 +181,7 @@ if defined?(Capybara::Session)
           # Move the mouse based on Fips algorithm:
           # Calculate the distance between where the mouse is and needs to be
           # Calculate the time it will take to move that distance
+          starting_position ||= { x: rand(1000), y: rand(1000) }
           # Move the mouse in that time
           distance = Math.sqrt((coords[:x] + coords[:w] / 2 - starting_position[:x]) ** 2 + (coords[:y] + coords[:h] / 2 - starting_position[:y]) ** 2)
           time = distance / 1000
