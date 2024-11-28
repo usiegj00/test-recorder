@@ -186,10 +186,12 @@ if defined?(Capybara::Session)
           distance = Math.sqrt((coords[:x] + coords[:w] / 2 - starting_position[:x]) ** 2 + (coords[:y] + coords[:h] / 2 - starting_position[:y]) ** 2)
           time = distance / 1000
           puts "Distance: #{distance}, Time: #{time}"
+          frames = time / 0.05
           # Move the mouse in 0.05 second intervals:
-          time.to_i.times do |i|
+          (1..frames).each do |i|
             # self.session.driver.browser.mouse.move(x: starting_position[:x] + (coords[:x] + coords[:w] / 2 - starting_position[:x]) * i / time, y: starting_position[:y] + (coords[:y] + coords[:h] / 2 - starting_position[:y]) * i / time)
-            x, y = starting_position[:x] + (coords[:x] + coords[:w] / 2 - starting_position[:x]) * i / time, starting_position[:y] + (coords[:y] + coords[:h] / 2 - starting_position[:y]) * i / time
+            x = starting_position[:x] + (coords[:x] + coords[:w] / 2 - starting_position[:x]) * i / frames
+            y = starting_position[:y] + (coords[:y] + coords[:h] / 2 - starting_position[:y]) * i / frames
             add_pointer(x: x, y: y)
             self.session.driver.browser.mouse.move(x: x, y: y)
             sleep(0.05)
