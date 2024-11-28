@@ -87,14 +87,15 @@ module TestRecorder
                 box.classList.toggle('button-' + i, buttons & (1 << i));
             }
           }, false);
-        }
+        };
+      installMouseHelper();
       JAVASCRIPT
 
       # Define the function on the page
       @page.driver.browser.page.evaluate(javascript)
 
       # Call the function
-      @page.driver.browser.page.evaluate("installMouseHelper()")
+      # @page.driver.browser.page.evaluate("installMouseHelper()")
     end
 
     def start(page:, enabled: nil)
