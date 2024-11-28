@@ -90,6 +90,40 @@ if defined?(Capybara::Session)
         # @page.driver.browser.page.evaluate("installMouseHelper()")
       end
 
+      # Animation to show where the click happened and then disappear
+      # Make this distinct from the moving cursor (add_pointer)
+      def blink_pointer(x:, y:)
+        javascript = <<~JS
+        (function() {
+          const box = document.createElement('div');
+          box.id = 'cast-pointer';
+          box.style.position = 'fixed';
+          box.style.top = '#{y}px';
+          box.style.left = '#{x}px';
+          # Make this bigger than the pointer
+          box.style.width = '40px';
+          box.style.height = '40px';
+          box.style.background = 'rgba(0,0,0,.4)';
+          box.style.border = '1px solid white';
+          box.style.borderRadius = '20px';
+          box.style.margin = '-20px 0 0 -20px';
+          box.style.padding = '0';
+          box.style.zIndex = '9999';
+          box.style.pointerEvents = 'none';
+          box.style.transition = 'background .2s, border-radius .2s, border-color .2s';
+          document.body.appendChild(box);
+          setTimeout(() => {
+            box.style.background = 'rgba(0,0,0,0)';
+            box.style.border = '1px solid rgba(0,0,0,0)';
+          }, 200);
+          setTimeout(() => {
+            box.remove();
+          }, 400);
+        })();
+        JS
+        self.session.driver.browser.page.evaluate(javascript)
+      end
+
       def add_pointer(x:, y:)
         # Make the pointer centered on x,y
         javascript = <<~JS
@@ -119,6 +153,15 @@ if defined?(Capybara::Session)
         self.session.driver.browser.page.evaluate(javascript)
       end
 
+      def remove_red_box
+        javascript = <<~JS
+          (function() {
+            const existingBox = document.getElementById('cast-element-highlight');
+            if (existingBox) { existingBox.remove(); }
+          })();
+        JS
+        self.session.driver.browser.page.evaluate(javascript)
+      end
       def add_red_box(rect:)
         javascript = <<~JS
           (function() {
@@ -175,14 +218,15 @@ if defined?(Capybara::Session)
           # add_mouse_pointer
           add_red_box(rect: coords) 
 
-          starting_position = self.session.driver.browser.mouse.instance_variable_get("@position")
-          debugger
+          starting_position = {
+            x: self.session.driver.browser.mouse.instance_variable_get("@x") || rand(1000),
+            y: self.session.driver.browser.mouse.instance_variable_get("@y") || rand(1000)
+          }
           puts "Starting position: #{starting_position}"
           puts "Moving to: #{coords[:x] + coords[:w] / 2}, #{coords[:y] + coords[:h] / 2}"
           # Move the mouse based on Fips algorithm:
           # Calculate the distance between where the mouse is and needs to be
           # Calculate the time it will take to move that distance
-          starting_position ||= { x: rand(1000), y: rand(1000) }
           # Move the mouse in that time
           distance = Math.sqrt((coords[:x] + coords[:w] / 2 - starting_position[:x]) ** 2 + (coords[:y] + coords[:h] / 2 - starting_position[:y]) ** 2)
           time = distance / 1000
@@ -197,6 +241,9 @@ if defined?(Capybara::Session)
             self.session.driver.browser.mouse.move(x: x, y: y)
             sleep(0.05)
           end
+          remove_red_box
+          sleep(0.05)
+          blink_pointer(x: coords[:x] + coords[:w] / 2, y: coords[:y] + coords[:h] / 2)
           # simulate_mouse_movement(coords[:x] + coords[:w] / 2, coords[:y] + coords[:h] / 2)
           # Click the element
           # self.session.driver.browser.mouse.down.up
